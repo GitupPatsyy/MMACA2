@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>D3 Pie Chart CA2</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--link for d3 lib-->
+        <script type="text/javascript" src="js/d3.min.js"></script>
+    </head>
+    <body>
+
+        <script type="text/javascript">
+//            put all the fancy d3 shit inside of here
+
+            var data = [];
+            var pieData;
+            var jSonfile = "fruits.json";
+
+            d3.json(jSonfile, function (dataSet) {
+                var fruit = {
+                    fruit: +dataSet.fruit,
+                    qty: dataSet.qty
+                };
+                data.push(fruit)
+                
+//            //Take the object it returns and PUSH it to the array
+//                    for (key in dataSet) { //IN allows you to go through objects n
+//                        data.push(dataSet[key].qty);
+//                    }
+               
+                pieData = dataSet;
+                console.log(pieData);
+//          Variables for Widht and Height of SVG
+                var SVGwidth = 1400;
+                var SVGheight = 1000;
+
+//            Svg for drawing all your sexy shit 
+                var Svg = d3.select("body")
+                        .append("svg")
+                        .attr("height", SVGheight)
+                        .attr("width", SVGwidth);
+
+                var pieCalc = d3.layout.pie() //Calculates the space that each individual index of data,
+                        // will need in the format of a piecahrt
+                        .startAngle(0 * (2 * Math.PI / 360)) //Convert 0 degress to Radeons
+                        .endAngle(360 * (2 * Math.PI / 360)) //Convert 360 degress to Radeons
+                        .padAngle(10 * (2 * Math.PI / 360)); //Padding angel converted too
+
+                //For drawing the arcs to create the pie chart
+                var arcReactor = d3.svg.arc().innerRadius(80).outerRadius(100).cornerRadius(3);
+
+                //Give the sexy svg a backgrund colour
+                Svg.append("rect")
+                        .attr("width", "100%")
+                        .attr("height", "100%")
+                        .attr("fill", "#6C7A89");
+
+                Svg.selectAll("arc")
+                        .data(pieCalc(data))
+                        .enter()
+                        .append("arc")
+                        .attr("transform", 'translate(250,250)')
+                        .attr("fill", 'black')
+                        .attr('stroke', 'black');
+                
+                Svg.selectAll("path")
+                        .attr("d", "arc")
+                        .attr("d", function (d) {
+                            return arcReactor(d.qty);
+                })
+                
+               
+
+                Svg.selectAll("text")
+                        .data(data)
+                        .enter()
+                        .append("text")
+                        .attr("fill", 'black')
+                        .text(function (d) {
+                            return d.qty;
+                        })
+                        .attr("transform", 'translate(250,250)')
+
+            });
+
+
+
+
+        </script>
+    </body>
+</html>

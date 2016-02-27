@@ -1,0 +1,11 @@
+{
+    "fruits":[
+    {"fruit":"Grapes", "qty":145},
+    {"fruit":"Pears", "qty":175}, 
+    {"fruit":"Kiwis","qty":120},
+    {"fruit":"Bananas","qty":275},
+    {"fruit":"Apples","qty":135},
+    {"fruit":"Oranges","qty":60}
+    
+]
+}
