@@ -66,18 +66,25 @@ and open the template in the editor.
                         .append("svg")
                         .attr("height", SVGheight) //Height set in the variable above
                         .attr("width", SVGwidth); //Width for svg set
-                        
+
 
                 Svg.append("g")//Grouping for Segments
                         .attr("class", "seggys");//Class seggys
 
                 Svg.append("g")//Grouping for Circles
                         .attr("class", "cexxys");//Class cexxys
-               
+
+                Svg.append("g")//Grouping for outer segments
+                        .attr("class", "seggysout");
+
+                Svg.append("g")//Grouping for the circles of the outer segment
+                        .attr("class", "cexxysout");
+
                 //For drawing the arcs to create the pie chart
                 var arcReactor = d3.svg.arc().innerRadius(80).outerRadius(300).cornerRadius(3);
                 var bigArcReactor = d3.svg.arc().innerRadius(300).outerRadius(400).cornerRadius(3);
-                
+
+                //For inner circle segments
                 Svg.select(".seggys")
                         .selectAll("path")
                         .data(pieData)
@@ -93,8 +100,21 @@ and open the template in the editor.
                         .attr('stroke', 'white')//stroke white for outside the pie chart
                         .attr("stroke-width", 2);
                 
+                //For outer circle segment
+                Svg.select(".seggysout")
+                        .selectAll("path")
+                        .data(pieData)
+                        .enter()
+                        .append("path") //Add a path
+                        .attr('d', function (d) {
+                            return bigArcReactor(d); // create an arc for that object based on its quantity
+                        })
+                        .attr("transform", 'translate(500,500)')//Move the pie chart to (500,500)
+                        .attr("fill", "none")
+
+                //Inner segments circles
                 var cexxys = Svg.select(".cexxys").selectAll("circle")
-                        .data(pieData) //Uuse the piedata
+                        .data(pieData) //Use the piedata
                         .enter() //run thorugh the dataset
                         .append("circle") //append circle
                         .attr("cx", function (d) {
@@ -102,6 +122,22 @@ and open the template in the editor.
                         })
                         .attr("cy", function (d) {
                             return arcReactor.centroid(d)[1];
+                        })
+                        .attr("fill", circleFill)
+                        .attr("r", circleR)
+                        .attr("stroke", circleStroke)
+                        .attr("transform", "translate (500,500)");
+
+                //Outer segments circles
+                var cexxysout = Svg.select(".cexxysout").selectAll("circle")
+                        .data(pieData) //Uuse the piedata
+                        .enter() //run thorugh the dataset
+                        .append("circle") //append circle
+                        .attr("cx", function (d) {
+                            return bigArcReactor.centroid(d)[0];//Use big arc maker
+                        })
+                        .attr("cy", function (d) {
+                            return bigArcReactor.centroid(d)[1];//Use the big arc maker 
                         })
                         .attr("fill", circleFill)
                         .attr("r", circleR)
