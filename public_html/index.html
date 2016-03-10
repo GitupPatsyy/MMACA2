@@ -23,10 +23,17 @@ and open the template in the editor.
             var pieData; //varible to hold the pie calculator and the data from the json
             var jSonfile = "fruits.json"; //Variable for Json file
             var c20b = d3.scale.category20b();//Category 20b colours for the PIE
-            var degs = 0.03 * (180 / Math.PI);
-            var circleR = 5;
-            var circleStroke = '#ccc';
-            var circleFill = '#666';
+            var degs = 0.03 * (180 / Math.PI); //Converted from rads to degs
+            var circleR = 5; //circle radius
+            var circleStroke = '#ccc'; //circle stroke color
+            var circleFill = '#666'; //filling the circle a dark greyish
+            var lineLength = 160; //line lentght for polylines 160px
+            var lineThick = 1; //Line thickness 1px
+            var lineCol = '#ccc'; //line color same as the circle stroke
+            var textCol = 'white'; //textcolor is white
+            var fontType = 'Helvetica'; //font style helvetica
+            var fruitSize = 25;//fontsize for fruit text
+            var qtySize = 15;//fontsize for qty text
 
             d3.json(jSonfile, function (dataSet) { //Function to add the data from a json file
                 //                This was too add the fruit object to a local array for calling the dataset the way we were in the labs
@@ -41,7 +48,6 @@ and open the template in the editor.
 //                        data.push(dataSet[key].qty);
 //                    }
 
-
                 var pieCalc = d3.layout.pie() //Calculates the space that each individual index of data,
                         // will need in the format of a piecahrt
                         .value(function (d) { //Values will be input for all the objects in
@@ -49,41 +55,42 @@ and open the template in the editor.
                         })
                         .padAngle(degs * (2 * Math.PI / 360))//Padding angel converted too
                         .sort(null);
-
-
-
-
                 pieData = pieCalc(dataSet);
                 console.log(pieData); //Log the dataSet to the console.
-
-
+                //
+                function midAngle(d) {
+                    return d.startAngle + (d.endAngle - d.startAngle) / 2;
+                }
+                //
 //          Variables for Widht and Height of SVG
                 var SVGwidth = 1400;
                 var SVGheight = 1000;
-
 //            Svg for drawing all your sexy shit
                 var Svg = d3.select("body")
                         .append("svg")
                         .attr("height", SVGheight) //Height set in the variable above
-                        .attr("width", SVGwidth); //Width for svg set
+                        .attr("width", SVGwidth)//Width for svg set
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
 
-
+//Grouping
                 Svg.append("g")//Grouping for Segments
-                        .attr("class", "seggys");//Class seggys
+                        .attr("class", "seggys"); //Class seggys
 
                 Svg.append("g")//Grouping for Circles
-                        .attr("class", "cexxys");//Class cexxys
+                        .attr("class", "cexxys"); //Class cexxys
 
                 Svg.append("g")//Grouping for outer segments
                         .attr("class", "seggysout");
-
                 Svg.append("g")//Grouping for the circles of the outer segment
                         .attr("class", "cexxysout");
 
+                Svg.append("g")//Grouping for the qty for text
+                        .attr("class", "qty");
+                Svg.append("g")//Grouping for the fruit names for txt
+                        .attr("class", "names");
                 //For drawing the arcs to create the pie chart
                 var arcReactor = d3.svg.arc().innerRadius(80).outerRadius(300).cornerRadius(3);
                 var bigArcReactor = d3.svg.arc().innerRadius(300).outerRadius(400).cornerRadius(3);
-
                 //For inner circle segments
                 Svg.select(".seggys")
                         .selectAll("path")
@@ -93,13 +100,12 @@ and open the template in the editor.
                         .attr('d', function (d) {
                             return arcReactor(d); // create an arc for that object based on its quantity
                         })
-                        .attr("transform", 'translate(500,500)')//Move the pie chart to (500,500)
                         .attr("fill", function (d, i) { //Color the pie chart using Category 20b
                             return c20b(i);
                         })
                         .attr('stroke', 'white')//stroke white for outside the pie chart
-                        .attr("stroke-width", 2);
-                
+                        .attr("stroke-width", 2)
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
                 //For outer circle segment
                 Svg.select(".seggysout")
                         .selectAll("path")
@@ -109,8 +115,9 @@ and open the template in the editor.
                         .attr('d', function (d) {
                             return bigArcReactor(d); // create an arc for that object based on its quantity
                         })
-                        .attr("transform", 'translate(500,500)')//Move the pie chart to (500,500)
                         .attr("fill", "none")
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
+
 
                 //Inner segments circles
                 var cexxys = Svg.select(".cexxys").selectAll("circle")
@@ -126,48 +133,95 @@ and open the template in the editor.
                         .attr("fill", circleFill)
                         .attr("r", circleR)
                         .attr("stroke", circleStroke)
-                        .attr("transform", "translate (500,500)");
-
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
                 //Outer segments circles
                 var cexxysout = Svg.select(".cexxysout").selectAll("circle")
                         .data(pieData) //Uuse the piedata
                         .enter() //run thorugh the dataset
                         .append("circle") //append circle
                         .attr("cx", function (d) {
-                            return bigArcReactor.centroid(d)[0];//Use big arc maker
+                            return bigArcReactor.centroid(d)[0]; //Use big arc maker
                         })
                         .attr("cy", function (d) {
-                            return bigArcReactor.centroid(d)[1];//Use the big arc maker 
+                            return bigArcReactor.centroid(d)[1]; //Use the big arc maker 
                         })
-                        .attr("fill", circleFill)
-                        .attr("r", circleR)
-                        .attr("stroke", circleStroke)
-                        .attr("transform", "translate (500,500)");
+                        .attr("fill", "none")
+                        .attr("r", 0)
+                        .attr("stroke", "none")
 
-
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
                 //Give the sexy svg a backgrund colour
 //                Svg.append("rect")
 //                        .attr("width", "100%")
 //                        .attr("height", "100%")
 //                        .attr("fill", "#6C7A89");
 
+                Svg.selectAll("polyline")
+                        .data(pieData)
+                        .enter()
+                        .append("polyline")
+                        .attr("fill", "none")
+                        .attr("points", function (d) {
+                            return arcReactor.centroid(d)[0] + " , " + arcReactor.centroid(d)[1] //For x1 y1
+                                    + " , " + bigArcReactor.centroid(d)[0] + " , " + bigArcReactor.centroid(d)[1] //x2 y2
+                                    + " , " + ((bigArcReactor.centroid(d)[0] < 0) ? bigArcReactor.centroid(d)[0] - 160 : bigArcReactor.centroid(d)[0] + 160)//Line length 160px
+                                    + " , " + bigArcReactor.centroid(d)[1]
+                        })
+                        .attr("stroke", lineCol)
+                        .attr("width", lineThick)
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
 
+                //Text for Fruit Name
+                var names = Svg.select(".names").selectAll("text") //Select al the text
+                        .data(pieData) //Using the data from pieData
+                        .enter() //Going to loop through each of the params
+                        .append("text") //Add text 
+                        .text(function (d) {
+                            return d.data.fruit; //Text that will be added is fruit names from json
+                        })
+                        .style("fill", textCol)//text color
+                        .style("font-family", fontType)
+                        .style("font-size", fruitSize)
+                        .attr("x", function (d) {//using a function of d we are getting the x pos of where the text will go
+                            if (bigArcReactor.centroid(d)[0] > 0) {//if the big arc makers centroid is less than 0 rads 
+                                return bigArcReactor.centroid(d)[0] + 115;//for pos on line
+                            }
+                            else {
+                                return bigArcReactor.centroid(d)[0] - 130;//for pos on leftside of the chart line
+                            }
+                        })
+                        .attr("y", function (d) { //Why position using the second point of the big reactors points
+                            return bigArcReactor.centroid(d)[1] - 7;
+                        })
+                        .attr("text-anchor", "middle")
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
 
-//                Svg.selectAll("text") //Select al the text
-//                        .data(pieData) //Using the data from pieData
-//                        .enter() //Going to loop through each of the params
-//                        .append("text") //Add text 
-//                        .attr("fill", 'black') //Text colour of black 
-//                        .text(function (d) {
-//                            return d.fruit; //Text that will be added is fruit names from json
-//                        })
-//                        .attr("transform", 'translate(500,500)'); //move the chart to (500,500)
+//Text for fruit qty
+                var qty = Svg.select(".qty").selectAll("text") //Select al the text
+                        .data(pieData) //Using the data from pieData
+                        .enter() //Going to loop through each of the params
+                        .append("text") //Add text 
+                        .text(function (d) {
+                            return d.data.qty; //Text that will be added is fruit names from json
+                        })
+                        .style("fill", textCol)//text color
+                        .style("font-family", fontType)
+                        .style("font-size", qtySize)
+                        .attr("x", function (d) {//using a function of d we are getting the x pos of where the text will go
+                            if (bigArcReactor.centroid(d)[0] > 0) {//if the big arc makers centroid is less than 0 rads 
+                                return bigArcReactor.centroid(d)[0] + 140;//
+                            }
+                            else {
+                                return bigArcReactor.centroid(d)[0] - 140;//
+                            }
+                        })
+                        .attr("y", function (d) { //Y position using the second point of the big reactors points
+                            return bigArcReactor.centroid(d)[1] + 16;
+                        })
+                        .attr("text-anchor", "middle")//Anchor the text 
+                        .attr("transform", "translate(" + SVGwidth / 2 + "," + SVGheight / 2 + ")");//Translate the svg to the center of the page
 
-
-
-            });
-
-
+            })
 
 
         </script>
